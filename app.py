@@ -32,7 +32,7 @@ with st.sidebar:
 
     mode = st.radio(
         "Search Mode",
-        options=["Past Livestreams (completed)", "Any Videos + Age-restricted filter"],
+        options=["Past Livestreams (completed)", "Any Videos"],
         index=0
     )
 
@@ -61,9 +61,14 @@ with st.sidebar:
 
     max_results = st.slider("Max results to fetch", 5, 50, 30)
 
-    only_age_restricted = False
-    if mode == "Any Videos + Age-restricted filter":
-        only_age_restricted = st.checkbox("Show only age-restricted videos", value=True)
+    st.divider()
+    
+    # Universal toggle: Works for both Normal Videos and Livestreams
+    only_age_restricted = st.checkbox(
+        "Show ONLY age-restricted videos", 
+        value=True, 
+        help="Applies to both livestreams and normal videos"
+    )
 
     search_button = st.button("Search", type="primary", use_container_width=True)
 
@@ -121,6 +126,7 @@ def search_videos(api_key, query, mode, published_after, published_before,
         content_rating = video["contentDetails"].get("contentRating", {})
         is_age_restricted = content_rating.get("ytRating") == "ytAgeRestricted"
 
+        # Apply the age restriction filter universally
         if only_age_restricted and not is_age_restricted:
             continue
 
@@ -183,14 +189,24 @@ if search_button:
                                 st.image(video["thumbnail"], use_container_width=True)
 
                             with col_info:
-                                badges = []
+                                # Render the title normally
+                                st.markdown(f"### [{video['title']}]({video['url']})")
+                                
+                                # Generate HTML for custom chips (pills) under the title
+                                chips_html = ""
                                 if video["was_live"]:
-                                    badges.append("🔴 PAST LIVE")
+                                    chips_html += "<span style='background-color: #ff4b4b; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold; margin-right: 8px;'>🔴 PAST LIVE</span>"
                                 if video["age_restricted"]:
-                                    badges.append("🔞 AGE-RESTRICTED")
+                                    chips_html += "<span style='background-color: #ff9f36; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold; margin-right: 8px;'>🔞 18+</span>"
+                                
+                                # If there are any chips to show, display them
+                                if chips_html:
+                                    st.markdown(chips_html, unsafe_allow_html=True)
+                                
+                                # Spacer for visual breathing room
+                                st.write("") 
 
-                                badge_text = "  ".join(badges)
-                                st.markdown(f"### [{video['title']}]({video['url']}) {badge_text}")
+                                # Video details
                                 st.write(f"**Channel:** {video['channel']}")
                                 st.write(
                                     f"**Views:** {video['views']:,}  |  "
@@ -198,7 +214,7 @@ if search_button:
                                     f"**Duration:** {video['duration']}"
                                 )
 
-                            st.divider()
+                        st.divider()
 
             except Exception as e:
                 st.error(f"Error: {str(e)}")
