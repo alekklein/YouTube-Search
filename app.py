@@ -1,10 +1,3 @@
-To achieve this, we need to implement **pagination**. Instead of doing a single API request and just returning whatever is left after filtering, the script needs to keep fetching new "pages" of results from YouTube until the desired number of filtered videos is reached.
-
-**Important Note on API Quota:** I have added a safety limit (`MAX_PAGES = 10`) to the loop. Since YouTube charges API quota for every search, if you search for something that has very few 18+ videos, the script could theoretically search thousands of pages and drain your daily API limit in seconds. This limit ensures it checks a maximum of 500 videos (10 pages of 50) before giving up and returning what it found.
-
-Here is the fully updated code with the pagination logic built into the search function:
-
-```python
 import streamlit as st
 from googleapiclient.discovery import build
 from datetime import date
@@ -273,5 +266,3 @@ else:
           YOUTUBE_API_KEY = "your_key_here"
           ```
         """)
-
-```
