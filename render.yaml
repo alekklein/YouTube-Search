@@ -1,9 +1,10 @@
 services:
   - type: web
-    name: youtube-search
+    name: tubescout
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    autoDeploy: true
     envVars:
       - key: YOUTUBE_API_KEYS
         sync: false
